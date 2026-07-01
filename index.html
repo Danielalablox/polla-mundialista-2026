@@ -1006,11 +1006,23 @@ window.showPollaDetail = id => {
   const bracketHTML = rounds.map(([key,label]) => {
     const picks = (p.bracket && p.bracket[key]) || [];
     if (!picks.length) return '';
-    return `<div style="margin-bottom:10px">
-      <div class="muted" style="font-size:12px;font-weight:700;margin-bottom:5px">${label}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px">
-        ${picks.map(t=>`<span class="tag tm" style="font-size:11px">${fl(t)}${key==='r32'?(res?.bracket?.r32win?.includes(t)?' ✅':''):wonR(t,key)}</span>`).join('')}
+    // equipos que realmente avanzaron en esa ronda (r32 usa r32win)
+    const won = key === 'r32' ? (res?.bracket?.r32win || []) : (res?.bracket?.[key] || []);
+    const hits = picks.filter(t => won.includes(t)).length;
+    const cards = picks.map(t => {
+      const ok = won.includes(t);
+      return `<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:9px;font-size:14px;
+        background:${ok?'#0c2415':'var(--card2)'};border:1.5px solid ${ok?'var(--green)':'var(--border)'};
+        color:${ok?'var(--green)':'#fff'};font-weight:${ok?'700':'500'}">
+        <span style="flex:1;min-width:0">${fl(t)}</span>${ok?'<span style="font-size:15px;flex-shrink:0">✅</span>':''}
+      </div>`;
+    }).join('');
+    return `<div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px">
+        <div style="font-size:15px;font-weight:800;color:var(--gold)">${label}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap">${hits}/${picks.length} ✅</div>
       </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px">${cards}</div>
     </div>`;
   }).join('');
 
